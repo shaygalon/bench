@@ -1,9 +1,21 @@
 use XML::Loy;
+  use Getopt::Long;
+  my $FN   = "result.csv";
+  my $RN;
+  my $verbose;
+$category="generic";
+  GetOptions ("category=s" => \$category,    # numeric
+              "file=s"   => \$FN,      # string
+              "name=s"   => \$RN,      # string
+              "verbose"  => \$verbose);  # flag
+ 
 
-open(CSV,"<$ARGV[0]");
-$FN=$ARGV[0];
-$FN=~s/.csv//;
-my $xml = XML::Loy->new('report' => { 'name' => $FN});
+open(CSV,"<$FN") or die "Could not open $FN !";
+if (!defined($RN)) {
+	$RN=$FN;
+	$RN=~s/.csv//;
+}
+my $xml = XML::Loy->new('report' => { 'name' => $RN, 'categ' => $category});
 
 $header=0;
 while (<CSV>) {
@@ -26,7 +38,7 @@ if ($hl =~ /Unit/i) { $has_unit=1; } else { $has_unit=0; }
 
  
 # Add elements to the document
-my $header = $xml->add('test' => { 'name' => $FN, 'executed' => 'yes' } );
+my $header = $xml->add('test' => { 'name' => $RN, 'executed' => 'yes' } );
 my $r=$header->add('result' );
 $r->add('success' => { 'passed' => "yes", 'state' => "100", 'hasTimedOut' => "false" } ); 
 $m=$r->add('metrics' => {} );
