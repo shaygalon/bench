@@ -3,11 +3,16 @@
 if [[ -z "$DURATION" ]] ; then
 DURATION=60
 fi
+DT=$(date '+%y-%m-%d_%H%M%S')
 if [[ -z "$RES" ]] ; then
-	RES=$(date '+%y-%m-%d_%H%M%S')
+	RES=$DT
 fi
 
-trap "echo Killed ':('; exit;" SIGINT SIGTERM
+function finish {
+		tar czf perf_capture_$DT.tgz $RES
+		exit
+}
+trap finish EXIT SIGINT SIGTERM
 
 mkdir -p $RES
 cnt=0
@@ -31,6 +36,4 @@ do
 	perf stat -e cycles,instructions,$counters -x, -a -I 1000 --per-core -o $RES/percore_perf_set_$cnt.csv -- sleep $DURATION > /dev/null 2>&1
 	cnt=$[$cnt+1]
 done
-
-tar czf perf_capture.tgz $RES
 
