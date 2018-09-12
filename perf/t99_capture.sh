@@ -7,6 +7,8 @@ if [[ -z "$RES" ]] ; then
 	RES=$(date '+%y-%m-%d_%H%M%S')
 fi
 
+trap "echo Killed ':('; exit;" SIGINT SIGTERM
+
 mkdir -p $RES
 cnt=0
 for counters in \
@@ -25,8 +27,8 @@ for counters in \
 	"r100,r180,r181,r182" \
 	"r183,r184,r185,r186" 
 do
-	perf stat -e cycles,instructions,$counters -x, -a -I 1000 > $RES/total_perf_set_$cnt.csv 2>&1 -- sleep $DURATION
-	perf stat -e cycles,instructions,$counters -x, -a -I 1000 --per-core > $RES/percore_perf_set_$cnt.csv 2>&1 -- sleep $DURATION
+	perf stat -e cycles,instructions,$counters -x, -a -I 1000 -o $RES/total_perf_set_$cnt.csv -- sleep $DURATION > /dev/null 2>&1
+	perf stat -e cycles,instructions,$counters -x, -a -I 1000 --per-core -o $RES/percore_perf_set_$cnt.csv -- sleep $DURATION > /dev/null 2>&1
 	cnt=$[$cnt+1]
 done
 
